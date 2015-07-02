@@ -1,0 +1,16 @@
+{
+  "name": "pit-of-paint",
+  "version": "1.0.0",
+  "description": "Multiplayer minigame in JavaScript consisting on painting over more area than the enemy. Original idea based on Splatoon, gameplay based on Crash Bash's Pogo Pandemonium minigame.",
+  "main": "client/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "http-server ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "keyboardjs": "^0.4.3"
+  },
+  "devDependencies": {}
+}
