@@ -1,6 +1,5 @@
 
-function Player (id, color, direction, position) {
-  this.id = id
+function Player (color, direction, position) {
   this.color = color
   this.dir = direction
   this.pos = position

@@ -39,7 +39,7 @@ function PlayerMng (playerNum, gridwidth) {
     pos.x = Math.floor(posPool[drawn]/gridwidth)
     pos.y = (posPool.splice(drawn, 1) - pos.x*gridwidth)
     
-    this.player[i] = new Player(i+1,Math.floor(Math.random()*16777215).toString(16),directionPick(),pos);
+    this.player[i] = new Player(Math.floor(Math.random()*16777215).toString(16),directionPick(),pos);
     console.log('player ' + i + ' created of color ' + this.player[i].color + ' in position (' + pos.x + ', ' + pos.y + ').')
     
     this.tiles[pos.x][pos.y].player_id = this.tiles[pos.x][pos.y].paint_id = i+1
@@ -47,7 +47,10 @@ function PlayerMng (playerNum, gridwidth) {
 }
 
 PlayerMng.prototype.collision = function (p_id) {
-  
+  if(this.player[p_id].dir == 'stun') {
+		console.log('am ko')
+		return true
+	}
   if((this.player[p_id].pos.x === 0 && this.player[p_id].dir === 'left') ||
      (this.player[p_id].pos.x === this.gridwidth-1 && this.player[p_id].dir === 'right') ||
      (this.player[p_id].pos.y === 0 && this.player[p_id].dir === 'up') ||
@@ -66,6 +69,7 @@ PlayerMng.prototype.collision = function (p_id) {
     pos_it[5] = {x: -1, y: +1};
     pos_it[6] = {x:  0, y: +1};
     pos_it[7] = {x: -1, y: +1};
+		pos_it[8] = {x: -2, y:  0};
     
     var i = 0;
     var found = false;
@@ -73,26 +77,32 @@ PlayerMng.prototype.collision = function (p_id) {
     var y;
     var p;
     while(i < 8 && !found) {
-	x = this.player[p_id].pos.x + pos_it[i].x;
-	y = this.player[p_id].pos.y + pos_it[i].y;
-	if(x>=0 && y>=0 && x<this.gridwidth && y<this.gridwidth)p = this.tiles[x][y].player_id - 1;
-	else p = 0;
-	if (p > 0) {
-	  found = (i == 0 && (this.player[p_id].dir == 'up' && this.player[p].dir == 'right') ||
-											 (this.player[p_id].dir == 'left' && this.player[p].dir == 'down')) ||
-		  (i == 2 && (this.player[p_id].dir == 'up' && this.player[p].dir == 'left') ||
-								 (this.player[p_id].dir == 'right' && this.player[p].dir == 'down')) ||
-		  (i == 5 && (this.player[p_id].dir == 'down' && this.player[p].dir == 'right') ||
-								 (this.player[p_id].dir == 'left' && this.player[p].dir == 'up')) ||
-			(i == 7 && (this.player[p_id].dir == 'down' && this.player[p].dir == 'left') ||
-								 (this.player[p_id].dir == 'right' && this.player[p].dir == 'up')) ||
-			(i == 1 && (this.player[p_id].dir == 'up' && this.player[p].dir == 'stun')) ||
-			(i == 3 && (this.player[p_id].dir == 'left' && this.player[p].dir == 'stun')) ||
-			(i == 4 && (this.player[p_id].dir == 'right' && this.player[p].dir == 'stun')) ||
-			(i == 6 && (this.player[p_id].dir == 'down' && this.player[p].dir == 'stun'));
-			
-	}
-	++i;
+			x = this.player[p_id].pos.x + pos_it[i].x;
+			y = this.player[p_id].pos.y + pos_it[i].y;
+			if(x<0 || y<0 || x>=this.gridwidth || y>=this.gridwidth) p = 0;
+			else p = this.tiles[x][y].player_id;
+			if (p > 0) {
+				--p;
+				console.log('found player', p)
+				found = (i == 0 && (this.player[p_id].dir == 'up' && this.player[p].dir == 'right') ||
+													 (this.player[p_id].dir == 'left' && this.player[p].dir == 'down')) ||
+					(i == 2 && (this.player[p_id].dir == 'up' && this.player[p].dir == 'left') ||
+										 (this.player[p_id].dir == 'right' && this.player[p].dir == 'down')) ||
+					(i == 5 && (this.player[p_id].dir == 'down' && this.player[p].dir == 'right') ||
+										 (this.player[p_id].dir == 'left' && this.player[p].dir == 'up')) ||
+					(i == 7 && (this.player[p_id].dir == 'down' && this.player[p].dir == 'left') ||
+										 (this.player[p_id].dir == 'right' && this.player[p].dir == 'up')) ||
+					(i == 1 && (this.player[p_id].dir == 'up' && (this.player[p].dir == 'stun' ||
+																											 this.player[p].dir == 'down'))) ||
+					(i == 3 && (this.player[p_id].dir == 'left' && (this.player[p].dir == 'stun' ||
+																													this.player[p].dir == 'right'))) ||
+					(i == 4 && (this.player[p_id].dir == 'right' && (this.player[p].dir == 'stun' ||
+																													 this.player[p].dir == 'left'))) ||
+					(i == 6 && (this.player[p_id].dir == 'down' && (this.player[p].dir == 'stun' ||
+																											 this.player[p].dir == 'up')));
+					
+			}
+			++i;
     }
     if(found) console.log('someone\'s blocking the way')
     else console.log('free path ahead')
@@ -106,6 +116,7 @@ PlayerMng.prototype.turn = function () {
   var info;
   
   for(i = 0; i < plPool.length; ++i) {
+		console.log('checking next player in the pool', i);
     if (this.collision(plPool[i])) {
       plPool.splice(i, 1);
       --i;
@@ -115,6 +126,8 @@ PlayerMng.prototype.turn = function () {
   for(i = 0; i < plPool.length; ++i) {
 		this.tiles[this.player[plPool[i]].pos.x][this.player[plPool[i]].pos.y].player_id = 0
 		this.player[plPool[i]].move()
+		console.log('Player', plPool[i], 'moved')
+		this.tiles[this.player[plPool[i]].pos.x][this.player[plPool[i]].pos.y].player_id = plPool[i] + 1
 	}
 	return plPool;
 }
