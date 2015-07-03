@@ -23,11 +23,11 @@ function directionPick () {
 }
 
 function PlayerMng (playerNum, gridwidth) {
-  console.log(playerNum + ' players')
+  console.log(playerNum, 'players')
   this.playerNum = playerNum
   this.tiles = gridmap(gridwidth)
   this.player = new Array(playerNum)
-  console.log('gridmap created of width ' + gridwidth)
+  console.log('gridmap created of width', gridwidth)
   this.gridwidth = gridwidth
   
   var i
@@ -40,7 +40,7 @@ function PlayerMng (playerNum, gridwidth) {
     pos.y = (posPool.splice(drawn, 1) - pos.x*gridwidth)
     
     this.player[i] = new Player(Math.floor(Math.random()*16777215).toString(16),directionPick(),pos);
-    console.log('player ' + i + ' created of color ' + this.player[i].color + ' in position (' + pos.x + ', ' + pos.y + ').')
+    console.log('player #' + (i+1) + ' created of color ' + this.player[i].color + ' in position (' + pos.x + ', ' + pos.y + ').')
     
     this.tiles[pos.x][pos.y].player_id = this.tiles[pos.x][pos.y].paint_id = i+1
   }
@@ -48,17 +48,18 @@ function PlayerMng (playerNum, gridwidth) {
 
 PlayerMng.prototype.collision = function (p_id) {
   if(this.player[p_id].dir == 'stun') {
-		console.log('am ko')
+		//console.log('am ko')
 		return true
 	}
   if((this.player[p_id].pos.x === 0 && this.player[p_id].dir === 'left') ||
      (this.player[p_id].pos.x === this.gridwidth-1 && this.player[p_id].dir === 'right') ||
      (this.player[p_id].pos.y === 0 && this.player[p_id].dir === 'up') ||
      (this.player[p_id].pos.y === this.gridwidth-1 && this.player[p_id].dir === 'down')) {
-        console.log('fucking wall')
+        //console.log('fucking wall')
 				this.player[p_id].dir = 'stun'
 				return true
      }
+	/*
   else {
     var pos_it = new Array(8);
     pos_it[0] = {x: -1, y: -1};
@@ -108,6 +109,8 @@ PlayerMng.prototype.collision = function (p_id) {
     else console.log('free path ahead')
     return found
   }
+	*/
+	return false
 }
 
 PlayerMng.prototype.turn = function () {
@@ -115,18 +118,18 @@ PlayerMng.prototype.turn = function () {
   var i = 0;
   var info;
   
+	
   for(i = 0; i < plPool.length; ++i) {
-		console.log('checking next player in the pool', i);
     if (this.collision(plPool[i])) {
       plPool.splice(i, 1);
       --i;
     }
   }
   
+	
   for(i = 0; i < plPool.length; ++i) {
 		this.tiles[this.player[plPool[i]].pos.x][this.player[plPool[i]].pos.y].player_id = 0
 		this.player[plPool[i]].move()
-		console.log('Player', plPool[i], 'moved')
 		this.tiles[this.player[plPool[i]].pos.x][this.player[plPool[i]].pos.y].player_id = plPool[i] + 1
 	}
 	return plPool;

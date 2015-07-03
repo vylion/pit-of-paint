@@ -5,8 +5,9 @@ var socket = require('socket.io-client')(serverURL)
 var stop = false
 var gridwidth = 10
 var playerNum = 2
-var manager = new PlayerMng(playerNum, gridwidth)
+var manager = {}
 var turnElapse = 0
+var initiated = false
 
 var debug = true;
 var preventer = function (evt) {
@@ -34,13 +35,53 @@ renderer.backgroundColor = 0xFFFFFF;
 };
 */
 
-var gridmargin = rectangle(50, 50, 50 + 50 * gridwidth, 50 + 50 * gridwidth, 0xFFFFFF, 0x000000, 2);
-//gridmargin.z = 0;
-stage.addChild(gridmargin);
-
+var gridBg = rectangle(50, 50, 50 + 50 * gridwidth, 50 + 50 * gridwidth, 0xFFFFFF, 0x000000, 2);
+//gridBg.z = 0;
 
 var splatTexture = PIXI.Texture.fromImage('splat.png');
 var playerTexture = PIXI.Texture.fromImage('arrow.png');
+
+var nextDir = [];
+
+animate();
+
+function animate() {
+
+	requestAnimationFrame(animate);
+	if(initiated) {
+		if(keyboard.char('W'))
+			nextDir[0] = 'up';
+		if (keyboard.char('S'))
+			nextDir[0] = 'down';
+		if (keyboard.char('A'))
+			nextDir[0] = 'left';
+		if (keyboard.char('D'))
+			nextDir[0] = 'right';
+	
+		if(keyboard.char('I'))
+			nextDir[1] = 'up';
+		if (keyboard.char('K'))
+			nextDir[1] = 'down';
+		if (keyboard.char('J'))
+			nextDir[1] = 'left';
+		if (keyboard.char('L'))
+			nextDir[1] = 'right';
+		
+		drawGridnPaint();
+	}
+
+	renderer.render(stage);
+}
+
+function lackOfPlayers() {
+	initiated = false
+	stage.removeChild(playerLayer)
+	stage.removeChild(tileLayer)
+	stage.removeChild(gridBg)
+}
+
+function initialization() {
+manager = new PlayerMng(playerNum, gridwidth)
 
 for(var i = 0; i < manager.player.length; ++i) {
   manager.player[i].sprite = new PIXI.Sprite(playerTexture);
@@ -77,42 +118,12 @@ for(var i = 0; i < manager.tiles.length; ++i) {
   }
 }
 
+stage.addChild(gridBg);
 stage.addChild(tileLayer);
 stage.addChild(playerLayer);
 //stage.updateLayersOrder();
 
-var nextDir = [];
-
-animate();
-
-function animate() {
-
-	requestAnimationFrame(animate);
-
-	if(keyboard.char('W'))
-		nextDir[0] = 'up';
-	if (keyboard.char('S'))
-		nextDir[0] = 'down';
-	if (keyboard.char('A'))
-		nextDir[0] = 'left';
-	if (keyboard.char('D'))
-		nextDir[0] = 'right';
-	
-	if(keyboard.char('I'))
-		nextDir[1] = 'up';
-	if (keyboard.char('K'))
-		nextDir[1] = 'down';
-	if (keyboard.char('J'))
-		nextDir[1] = 'left';
-	if (keyboard.char('L'))
-		nextDir[1] = 'right';
-	
-	if (keyboard.char('P'))
-		stop = !stop;
-	
-		drawGridnPaint();
-
-	renderer.render(stage);
+initiated = true;
 }
 
 function getAngle(dir, angle) {
